@@ -21,7 +21,7 @@ end UART_TX;
 architecture Behavioral of UART_TX is
 
 signal clk_count : unsigned(7 downto 0) := (others => '0');  
-signal bit_count : unsigned(2 downto 0) := (others => '0');
+signal bit_count : unsigned(3 downto 0) := (others => '0');
 signal flag      : std_logic := '0';
 signal end_flag  : std_logic := '0';
 signal datafull  : std_ulogic_vector(9 downto 0) := (others => '0');
@@ -38,14 +38,16 @@ begin
 
 if rising_edge(clk) then
 
-        datafull(0) <= '0'; 
-        datafull(9) <= '1';
-       datafull(8 downto 1) <= std_ulogic_vector(reverse(data_in));
-
-		  
 		  if end_flag = '0' then
 
             if en = '1' and flag = '0' then
+				
+				    
+            datafull(0) <= '0';  
+            datafull(9) <= '1';  
+            datafull(8 downto 1) <= std_ulogic_vector((data_in));
+
+		 
                 data_out <= datafull(0);  
                 busy <= '1';
                 done <= '0';
@@ -67,7 +69,7 @@ if rising_edge(clk) then
                     data_out <= datafull(to_integer(bit_count) + 1);
 						  
 						  
-						  if bit_count < to_unsigned(7, 4) then
+						  if bit_count < to_unsigned(8,4)  then
                         bit_count <= bit_count + 1;  -- Increment bit_count
                     else
                         bit_count <= (others => '0');  -- Reset bit_count after 8 bits
@@ -83,7 +85,7 @@ elsif end_flag = '1' then
             done <= '1';
 				
 				
-            if clk_count < to_unsigned(199, 8) then
+				if clk_count < to_unsigned(199, 8) then
                 clk_count <= clk_count + 1;
             else
                 clk_count <= (others => '0');
